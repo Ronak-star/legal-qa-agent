@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  agent:
+    build: ./agent
+    ports:
+      - "8000:8000"
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      PORT: 8000
+
+  gateway:
+    build: ./gateway
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: 4000
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
+      AGENT_URL: http://agent:8000
+      CORS_ORIGIN: "*"
+    depends_on:
+      - agent
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      VITE_GATEWAY_URL: http://localhost:4000
+    depends_on:
+      - gateway
